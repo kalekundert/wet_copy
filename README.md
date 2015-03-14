@@ -16,7 +16,7 @@ margins, and lines showing where to cut so the protocol can be taped into a lab
 notebook.  The wet_copy command won't let you print protocols that have any 
 lines wider than 53 characters (otherwise the margin will be too small) or that 
 have any uncommitted changes (otherwise the original protocol won't be 
-recoverable.)
+recoverable).
 
 Installation
 ============
