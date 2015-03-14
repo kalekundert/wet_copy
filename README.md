@@ -1,7 +1,7 @@
 Wet Copy
 ========
 The purpose of this program is to format and print wetlab protocols that are 
-stored as plaintext files in git repositories.  Printed out protocols are nice 
+stored as text files in git repositories.  Printed out protocols are nice 
 because they can be easily carried around lab during an experiment, annotated 
 in real time, and ultimately taped into a lab notebook.  Digital protocols 
 stored as text files in git repositories are nice as well, because they can be 
