@@ -8,7 +8,7 @@ stored as text files in git repositories are nice as well, because they can be
 updated and modified without losing any information.  This script helps manage 
 the process of printing out and keeping track of digital protocols.
 
-To use this program, start by the adding protocols you use to a git repository.  
+To use this program, start by the adding protocols you use to a git repository. 
 Then use the wet_copy command to print out copies of your protocols formatted 
 with all the information needed to recover the original digital protocol (e.g. 
 a repository URL and a commit hash), enough space to make annotations in the 
