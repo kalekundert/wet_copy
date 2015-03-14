@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+
+"""\
+The purpose of this program is to format and print wetlab protocols that are 
+stored as text files in git repositories.
+
+Usage:
+    wet_copy [options] <protocol>
+
+Options:
+    -d, --dry-run
+        Print the formatted protocol, but don't send it to the printer.
+
+Printed out protocols are nice because they can be easily carried around lab 
+during an experiment, annotated in real time, and ultimately taped into a lab 
+notebook.  Digital protocols stored as text files in git repositories are nice 
+as well, because they can be updated and modified without losing any 
+information.  This script helps manage the process of printing out and keeping 
+track of digital protocols.
+
+To use this program, start by the adding protocols you use to a git repository.  
+Then use the wet_copy command to print out copies of your protocols formatted 
+with all the information needed to recover the original digital protocol (e.g. 
+a repository URL and a commit hash), enough space to make annotations in the 
+margins, and lines showing where to cut so the protocol can be taped into a lab 
+notebook.  The wet_copy command won't let you print protocols that have any 
+lines wider than 53 characters (otherwise the margin will be too small) or that 
+have any uncommitted changes (otherwise the original protocol won't be 
+recoverable.)
+"""
+
+import os
+import subprocess
+import shlex
+import docopt
+import more_itertools
+
+args = docopt.docopt(__doc__)
+protocol_path = args['<protocol>']
+protocol_dir = os.path.dirname(protocol_path)
+
+page_width = 68
+page_height = 50
+content_width = 53
+content_height = 48
+
+# Figure out what commit is currently checked out and add that information to 
+# the top of the protocol.  Complain if there are any uncommitted changes.
+
+def run_command(command, cwd=None, error=None):
+    if isinstance(command, str):
+        command = shlex.split(command)
+    try:
+        return subprocess.check_output(command, cwd=cwd).strip().decode()
+    except subprocess.CalledProcessError:
+        if error is None:
+            raise
+        elif error == 'ok':
+            pass
+        else:
+            print('Error: ' + error)
+
+
+git_dir = run_command(
+        'git rev-parse --show-toplevel',
+        cwd=protocol_dir,
+        error="'{}' not in a git repository.".format(protocol_path))
+protocol_relpath = os.path.relpath(protocol_path, git_dir)
+git_commit = run_command(
+        'git log -n 1 --pretty=format:%H -- \'{}\''.format(protocol_relpath),
+        cwd=git_dir,
+        error="No commits found.")
+git_stale = protocol_relpath in run_command(
+        'git ls-files --modified --deleted --others',
+        cwd=git_dir)
+git_repo = run_command(
+        'git config --get remote.origin.url',
+        cwd=git_dir,
+        error='ok') or git_dir
+
+if git_stale:
+    print("Error: '{}' has uncommitted changes.".format(protocol_path))
+    print()
+    subprocess.call(shlex.split('git status'), cwd=git_dir)
+    raise SystemExit
+
+protocol = [
+        'file: {}'.format(protocol_relpath),
+        'repo: {}'.format(git_repo),
+        'commit: {}'.format(git_commit),
+        '',
+]
+
+
+# Read the protocol file.  Make sure no lines are too long, then add a margin.
+
+with open(protocol_path) as file:
+    for lineno, line in enumerate(file.readlines(), 1):
+        line = line.rstrip()
+        if line.startswith('vim:'):
+            continue
+        if len(line) > content_width:
+            print("Error: line {} is more than {} characters long.".format(
+                lineno, content_width))
+            raise SystemExit
+        protocol.append(line)
+
+pages = []
+left_margin = (78 - page_width) * ' ' + '│ '
+
+for page in more_itertools.chunked(protocol, content_height):
+    page += ['']
+    page = [left_margin + line for line in page]
+    page += [' ' * (78 - page_width) + '└' + '─' * page_width]
+    pages.append('\n'.join(page))
+
+# Print the protocol.
+
+
+if args['--dry-run']:
+    for page in pages:
+        print(page)
+else:
+    from subprocess import Popen, PIPE
+    form_feed = ''
+    lpr = Popen(shlex.split('lpr -o sides=one-sided'), stdin=PIPE)
+    lpr.communicate(input=form_feed.join(pages).encode())
+
