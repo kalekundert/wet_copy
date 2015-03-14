@@ -24,7 +24,7 @@ Clone this repository and create a link to the wet_copy command somewhere on
 your $PATH.  For example:
 
     $ cd ~
-    $ git clone git@guybrush.ucsf.edu:kortemme-lab/wet_copy.git
+    $ git clone git@github.com:kalekundert/wet_copy.git
     $ cd ~/.local/bin
     $ ln -s ~/wet_copy/wet_copy
 
