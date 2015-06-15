@@ -60,6 +60,12 @@ def format_protocol(protocol_path):
     adding margins and a header.
     """
 
+    protocol_path, *arguments = protocol_path.split()
+
+    if not os.path.exists(protocol_path):
+        print("Error: Protocol '{}' doesn't exist.".format(protocol_path))
+        raise SystemExit
+
     # Figure out what commit is currently checked out and add that information 
     # to the top of the protocol.  Complain if there are any uncommitted 
     # changes.
@@ -99,18 +105,30 @@ def format_protocol(protocol_path):
             '',
     ]
 
-    # Read the protocol file and make sure no lines are too long.
+    # If the given path refers to a python script, run that script to get the 
+    # protocol.  Otherwise just read the file.
 
-    with open(protocol_path) as file:
-        for lineno, line in enumerate(file.readlines(), 1):
-            line = line.rstrip()
-            if line.startswith('vim:'):
-                continue
-            if len(line) > content_width:
-                print("Error: line {} is more than {} characters long.".format(
-                    lineno, content_width))
-                raise SystemExit
-            protocol.append(line)
+    if protocol_path.endswith('.py'):
+        stdout = subprocess.check_output([protocol_path] + arguments)
+        lines = stdout.decode().split('\n')
+    else:
+        if arguments:
+            print("Error: Specified arugments to non-script protocol '{}'.".format(protocol_path))
+            raise SystemExit
+        with open(protocol_path) as file:
+            lines = file.readlines()
+
+    # Make sure none of the lines are too long to fit in the notebook.
+
+    for lineno, line in enumerate(lines, 1):
+        line = line.rstrip()
+        if line.startswith('vim:'):
+            continue
+        if len(line) > content_width:
+            print("Error: line {} is more than {} characters long.".format(
+                lineno, content_width))
+            raise SystemExit
+        protocol.append(line)
 
     # Remove trailing blank lines.
 
@@ -140,7 +158,7 @@ def print_protocols(protocols, dry_run=False):
                 print(protocol)
                 print(' ' * margin_width + '└' + '─' * (page_width + 1))
         else:
-            print(protocol)
+            print(protocols[0])
     else:
         from subprocess import Popen, PIPE
         form_feed = ''
