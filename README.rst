@@ -20,13 +20,10 @@ recoverable).
 
 Installation
 ============
-Clone this repository and create a link to the wet_copy command somewhere on 
-your $PATH.  For example:
+Clone this repository and run the included `setup.py` script:
 
-    $ cd ~
     $ git clone git@github.com:kalekundert/wet_copy.git
-    $ cd ~/.local/bin
-    $ ln -s ~/wet_copy/wet_copy
+    $ python wet_copy/setup.py install
 
 License
 =======

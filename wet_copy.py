@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
 """\
-The purpose of this program is to format and print wetlab protocols that are 
-stored as text files in git repositories.
+Format and print wetlab protocols stored as text files in git repositories.
 
 Usage:
     wet_copy [options] <protocols>...
+
+Arguments:
+    <protocols>...
+        The path to one or more protocols to print.  You can specify python 
+        scripts (with arguments) as protocols by providing a space-separated 
+        command line like so: wet_copy 'pcr.py 59 35'
 
 Options:
     -d, --dry-run
@@ -33,13 +38,17 @@ import os
 import subprocess
 import shlex
 import docopt
-import more_itertools
 
 page_width = 68
 page_height = 50
 content_width = 53
 content_height = 48
 margin_width = 78 - page_width
+
+def main():
+    args = docopt.docopt(__doc__)
+    protocols = [format_protocol(x) for x in args['<protocols>']]
+    print_protocols(protocols, dry_run=args['--dry-run'])
 
 def run_command(command, cwd=None, error=None):
     if isinstance(command, str):
@@ -167,9 +176,7 @@ def print_protocols(protocols, dry_run=False):
 
 
 if __name__ == '__main__':
-    args = docopt.docopt(__doc__)
-    protocols = [format_protocol(x) for x in args['<protocols>']]
-    print_protocols(protocols, dry_run=args['--dry-run'])
+    main()
 
 
 
