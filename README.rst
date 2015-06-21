@@ -20,10 +20,16 @@ recoverable).
 
 Installation
 ============
-Clone this repository and run the included `setup.py` script::
+The easiest way to install wet_copy is from the PyPI::
+
+    $ pip3 install wet_copy
+
+Alternatively, you can clone this repository and install wet_copy from source::
 
     $ git clone git@github.com:kalekundert/wet_copy.git
-    $ python wet_copy/setup.py install
+    $ pip3 install ./wet_copy
+
+Note that wet_copy requires python 3.
 
 License
 =======
