@@ -20,7 +20,7 @@ recoverable).
 
 Installation
 ============
-Clone this repository and run the included `setup.py` script:
+Clone this repository and run the included `setup.py` script::
 
     $ git clone git@github.com:kalekundert/wet_copy.git
     $ python wet_copy/setup.py install
