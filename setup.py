@@ -11,7 +11,7 @@ import distutils.core
 # $ git tag <version>; git push
 # $ python setup.py sdist upload -r pypi
 
-version = '1.0'
+version = '1.1'
 distutils.core.setup(
         name='wet_copy',
         version=version,
