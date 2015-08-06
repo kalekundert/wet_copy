@@ -148,11 +148,39 @@ def format_protocol(protocol_path):
     while not protocol[-1].strip():
         protocol.pop()
 
+    # Split the protocol into pages, if necessary.
+
+    pages = []
+    current_page = []
+
+    for i, line_i in enumerate(protocol):
+        # If the line isn't blank, add it to the current page like usual.
+
+        if line_i.strip():
+            current_page.append(line_i)
+
+        # If the line is blank, find the next blank line and see if it fits on 
+        # the same page.  If it does, add the blank line to the page and don't 
+        # do anything special.  If it doesn't, make a new page.
+
+        else:
+            for j, line_j in enumerate(protocol[i+1:], i+1):
+                if not line_j.strip():
+                    break
+
+            if i // page_height != j // page_height:
+                pages.append(current_page)
+                current_page = []
+            else:
+                current_page.append(line_i)
+
+    pages.append(current_page)
+
     # Add a margin on the left, so that the pages can be stapled together 
     # naturally.
 
     left_margin = ' ' * margin_width + '│ '
-    return '\n'.join(left_margin + line for line in protocol)
+    return ['\n'.join(left_margin + line for line in page) for page in pages]
 
 def print_protocols(protocols, dry_run=False):
     """
@@ -164,19 +192,21 @@ def print_protocols(protocols, dry_run=False):
     the terminal instead of being sent to the printer.
     """
 
+    pages = sum(protocols, [])
+
     if dry_run:
-        if len(protocols) > 1:
-            for protocol in protocols:
+        if len(pages) > 1:
+            for page in pages:
                 print(' ' * margin_width + '┌' + '─' * (page_width + 1))
-                print(protocol)
+                print(page)
                 print(' ' * margin_width + '└' + '─' * (page_width + 1))
         else:
-            print(protocols[0])
+            print(pages[0])
     else:
         from subprocess import Popen, PIPE
         form_feed = ''
         lpr = Popen(shlex.split('lpr -o sides=one-sided'), stdin=PIPE)
-        lpr.communicate(input=form_feed.join(protocols).encode())
+        lpr.communicate(input=form_feed.join(pages).encode())
 
 
 if __name__ == '__main__':
