@@ -40,9 +40,9 @@ import shlex
 import docopt
 
 page_width = 68
-page_height = 50
+page_height = 63
 content_width = 53
-content_height = 48
+content_height = page_height - 4
 margin_width = 78 - page_width
 
 def main():
@@ -111,7 +111,6 @@ def format_protocol(protocol_path):
             'file: {}'.format(protocol_relpath)[:page_width],
             'repo: {}'.format(git_repo)[:page_width],
             'commit: {}'.format(git_commit),
-            '',
     ]
 
     # If the given path refers to a python script, run that script to get the 
@@ -120,14 +119,19 @@ def format_protocol(protocol_path):
     if protocol_path.endswith('.py'):
         stdout = subprocess.check_output([protocol_path] + arguments)
         lines = stdout.decode().split('\n')
+        protocol[0] = 'file: {} {}'.format(
+                protocol_relpath, ' '.join(arguments))[:page_width]
     else:
         if arguments:
-            print("Error: Specified arugments to non-script protocol '{}'.".format(protocol_path))
+            print("Error: Specified arguments to non-script protocol '{}'.".format(protocol_path))
             raise SystemExit
         with open(protocol_path) as file:
             lines = file.readlines()
 
-    # Make sure none of the lines are too long to fit in the notebook.
+    # Add the actual protocol to the list of lines.  Make sure none of the 
+    # lines are too long to fit in the notebook.
+
+    protocol.append('')
 
     for lineno, line in enumerate(lines, 1):
         line = line.rstrip()
