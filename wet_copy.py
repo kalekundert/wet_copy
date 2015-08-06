@@ -38,6 +38,7 @@ import os
 import subprocess
 import shlex
 import docopt
+import datetime
 
 page_width = 68
 page_height = 63
@@ -108,7 +109,8 @@ def format_protocol(protocol_path):
     # this protocol can be found.
     
     protocol = [ # (no fold)
-            'file: {}'.format(protocol_relpath)[:page_width],
+            'date: {0:%B} {0.day}, {0.year}'.format(datetime.date.today()),
+            'file: {} {}'.format(protocol_relpath, ' '.join(arguments))[:page_width],
             'repo: {}'.format(git_repo)[:page_width],
             'commit: {}'.format(git_commit),
     ]
@@ -119,8 +121,6 @@ def format_protocol(protocol_path):
     if protocol_path.endswith('.py'):
         stdout = subprocess.check_output([protocol_path] + arguments)
         lines = stdout.decode().split('\n')
-        protocol[0] = 'file: {} {}'.format(
-                protocol_relpath, ' '.join(arguments))[:page_width]
     else:
         if arguments:
             print("Error: Specified arguments to non-script protocol '{}'.".format(protocol_path))
