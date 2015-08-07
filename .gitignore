@@ -1,3 +1,4 @@
 test_env/
 build/
 MANIFEST
+*.egg-info

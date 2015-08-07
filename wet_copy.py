@@ -109,10 +109,10 @@ def format_protocol(protocol_path):
     # this protocol can be found.
     
     protocol = [ # (no fold)
-            'date: {0:%B} {0.day}, {0.year}'.format(datetime.date.today()),
             'file: {} {}'.format(protocol_relpath, ' '.join(arguments))[:page_width],
             'repo: {}'.format(git_repo)[:page_width],
             'commit: {}'.format(git_commit),
+            'date: {0:%B} {0.day}, {0.year}'.format(datetime.date.today()),
     ]
 
     # If the given path refers to a python script, run that script to get the 
@@ -138,9 +138,10 @@ def format_protocol(protocol_path):
         if line.startswith('vim:'):
             continue
         if len(line) > content_width:
-            print("Error: line {} is more than {} characters long.".format(
+            print("Warning: line {} is more than {} characters long.".format(
                 lineno, content_width))
-            raise SystemExit
+            if input("Continue anyways? [y/N] ").lower() != 'y':
+                raise SystemExit
         protocol.append(line)
 
     # Remove trailing blank lines.
