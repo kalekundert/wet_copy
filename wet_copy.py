@@ -41,7 +41,7 @@ import docopt
 import datetime
 
 page_width = 68
-page_height = 63
+page_height = 60
 content_width = 53
 content_height = page_height - 4
 margin_width = 78 - page_width
@@ -206,7 +206,11 @@ def print_protocols(protocols, dry_run=False):
     else:
         from subprocess import Popen, PIPE
         form_feed = ''
-        lpr = Popen(shlex.split('lpr -o sides=one-sided'), stdin=PIPE)
+        print_cmd = (
+                'paps --font "FreeMono 12" --left-margin 0 --right-margin 0 | '
+                'lpr -o sides=one-sided'
+        )
+        lpr = Popen(print_cmd, shell=True, stdin=PIPE)
         lpr.communicate(input=form_feed.join(pages).encode())
 
 
