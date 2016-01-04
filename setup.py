@@ -11,19 +11,29 @@ import distutils.core
 # $ git tag <version>; git push
 # $ python setup.py sdist upload -r pypi
 
-version = '1.2'
+from wet_copy import __version__, __author__, __email__
+
+with open('README.rst') as file:
+    readme = file.read()
+
 distutils.core.setup(
         name='wet_copy',
-        version=version,
-        author='Kale Kundert',
-        author_email='kale@thekunderts.net',
+        version=__version__,
+        author=__author__,
+        author_email=__email__,
         url='https://github.com/kalekundert/wet_copy',
-        download_url='https://github.com/kalekundert/wet_copy/tarball/'+version,
+        download_url='https://github.com/kalekundert/wet_copy/tarball/v'+__version__,
         license='GPLv3',
         description="Format and print wetlab protocols stored as text files in git repositories.",
-        long_description=open('README.rst').read(),
-        keywords=['print', 'scientific', 'protocols'],
-        py_modules=['wet_copy'],
+        long_description=readme,
+        keywords=[
+            'print',
+            'scientific',
+            'protocols',
+        ],
+        py_modules=[
+            'wet_copy',
+        ],
         install_requires=[
             'docopt==0.6.2',
         ],

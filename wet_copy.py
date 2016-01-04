@@ -37,8 +37,11 @@ recoverable.)
 import os
 import subprocess
 import shlex
-import docopt
 import datetime
+
+__version__ = '1.2.0'
+__author__ = 'Kale Kundert'
+__email__ = 'kale.kundert@ucsf.edu'
 
 page_width = 68
 page_height = 60
@@ -47,6 +50,7 @@ content_height = page_height - 4
 margin_width = 78 - page_width
 
 def main():
+    import docopt
     args = docopt.docopt(__doc__)
     protocols = [format_protocol(x) for x in args['<protocols>']]
     print_protocols(protocols, dry_run=args['--dry-run'])
