@@ -96,7 +96,7 @@ def format_protocol(protocol_path):
             cwd=git_dir,
             error="No commits found.")
     git_stale = protocol_relpath in run_command(
-            'git ls-files --modified --deleted --others',
+            'git ls-files --modified --deleted --others --exclude-standard',
             cwd=git_dir)
     git_repo = run_command(
             'git config --get remote.origin.url',
