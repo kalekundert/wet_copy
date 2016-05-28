@@ -34,10 +34,8 @@ have any uncommitted changes (otherwise the original protocol won't be
 recoverable.)
 """
 
-import os
-import subprocess
-import shlex
-import datetime
+import os, subprocess, shlex, datetime
+from nonstdlib import *
 
 __version__ = '1.3.1'
 __author__ = 'Kale Kundert'
@@ -136,17 +134,27 @@ def format_protocol(protocol_path):
     # lines are too long to fit in the notebook.
 
     protocol.append('')
+    too_long_lines = []
 
     for lineno, line in enumerate(lines, 1):
         line = line.rstrip()
         if line.startswith('vim:'):
             continue
-        if len(line) > content_width:
-            print("Warning: line {} is more than {} characters long.".format(
-                lineno, content_width))
-            if input("Continue anyways? [y/N] ").lower() != 'y':
-                raise SystemExit
+
         protocol.append(line)
+        if len(line) > content_width:
+            too_long_lines.append(lineno)
+
+    if too_long_lines:
+        if too_long_lines == 1:
+            print("Warning: line {} is more than {} characters long.".format(
+                too_long_lines[0], content_width))
+        else:
+            print("Warning: lines {} are more than {} characters long.".format(
+                pretty_range(too_long_lines), content_width))
+
+        if input("Continue anyways? [y/N] ").lower() != 'y':
+            raise SystemExit
 
     # Remove trailing blank lines.
 

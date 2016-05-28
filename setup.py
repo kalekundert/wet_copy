@@ -39,6 +39,7 @@ setup(
     ],
     install_requires=[
         'docopt==0.6.2',
+        'nonstdlib>=1.9.0',
     ],
     entry_points = {
         'console_scripts': ['wet_copy=wet_copy:main'],
