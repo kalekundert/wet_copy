@@ -42,7 +42,7 @@ __author__ = 'Kale Kundert'
 __email__ = 'kale.kundert@ucsf.edu'
 
 page_width = 68
-page_height = 60
+page_height = 64
 content_width = 53
 content_height = page_height - 4
 margin_width = 78 - page_width
@@ -161,12 +161,14 @@ def format_protocol(protocol_path):
     while not protocol[-1].strip():
         protocol.pop()
 
-    # Split the protocol into pages, if necessary.
+    # Split the protocol into pages, if necessary.  New pages can only start 
+    # after blank lines.
 
     pages = []
     current_page = []
 
     for i, line_i in enumerate(protocol):
+
         # If the line isn't blank, add it to the current page like usual.
 
         if line_i.strip():
