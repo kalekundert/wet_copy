@@ -87,7 +87,7 @@ def format_protocol(protocol_path):
             cwd=os.path.dirname(os.path.abspath(protocol_path)),
             error="'{}' not in a git repository.".format(protocol_path))
 
-    protocol_relpath = os.path.relpath(protocol_path, git_dir)
+    protocol_relpath = os.path.relpath(os.path.realpath(protocol_path), git_dir)
 
     git_commit = run_command(
             'git log -n 1 --pretty=format:%H -- \'{}\''.format(protocol_relpath),
