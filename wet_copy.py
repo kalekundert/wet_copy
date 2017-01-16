@@ -16,6 +16,12 @@ Options:
     -d, --dry-run
         Print the formatted protocol, but don't send it to the printer.
 
+    -t, --tee
+        Print the protocol and send it to the printer.
+
+    -y, --yes
+        Answer yes to any questions that would be asked.
+
 Printed out protocols are nice because they can be easily carried around lab 
 during an experiment, annotated in real time, and ultimately taped into a lab 
 notebook.  Digital protocols stored as text files in git repositories are nice 
@@ -23,7 +29,7 @@ as well, because they can be updated and modified without losing any
 information.  This script helps manage the process of printing out and keeping 
 track of digital protocols.
 
-To use this program, start by the adding protocols you use to a git repository.  
+To use this program, start by the adding protocols you use to a git repository. 
 Then use the wet_copy command to print out copies of your protocols formatted 
 with all the information needed to recover the original digital protocol (e.g. 
 a repository URL and a commit hash), enough space to make annotations in the 
@@ -42,7 +48,7 @@ __author__ = 'Kale Kundert'
 __email__ = 'kale.kundert@ucsf.edu'
 
 page_width = 68
-page_height = 64
+page_height = 64  # 64 for LabPrinter, 63 for BackupPrinter
 content_width = 53
 content_height = page_height - 4
 margin_width = 78 - page_width
@@ -50,8 +56,8 @@ margin_width = 78 - page_width
 def main():
     import docopt
     args = docopt.docopt(__doc__)
-    protocols = [format_protocol(x) for x in args['<protocols>']]
-    print_protocols(protocols, dry_run=args['--dry-run'])
+    protocols = [format_protocol(x, args['--yes']) for x in args['<protocols>']]
+    print_protocols(protocols, args['--dry-run'], args['--tee'])
 
 def run_command(command, cwd=None, error=None):
     if isinstance(command, str):
@@ -65,8 +71,9 @@ def run_command(command, cwd=None, error=None):
             pass
         else:
             print('Error: ' + error)
+            raise SystemExit
 
-def format_protocol(protocol_path):
+def format_protocol(protocol_path, assume_yes=False):
     """
     Read the given file and convert it into a nicely formatted protocol by 
     adding margins and a header.
@@ -145,8 +152,8 @@ def format_protocol(protocol_path):
         if len(line) > content_width:
             too_long_lines.append(lineno)
 
-    if too_long_lines:
-        if too_long_lines == 1:
+    if too_long_lines and not assume_yes:
+        if len(too_long_lines) == 1:
             print("Warning: line {} is more than {} characters long.".format(
                 too_long_lines[0], content_width))
         else:
@@ -197,7 +204,7 @@ def format_protocol(protocol_path):
     left_margin = ' ' * margin_width + '│ '
     return ['\n'.join(left_margin + line for line in page) for page in pages]
 
-def print_protocols(protocols, dry_run=False):
+def print_protocols(protocols, dry_run=False, tee=False):
     """
     Print out the given protocols.
 
@@ -218,18 +225,20 @@ def print_protocols(protocols, dry_run=False):
         else:
             print(pages[0])
     else:
+        if tee:
+            for page in pages:
+                print(page)
+
         from subprocess import Popen, PIPE
         form_feed = ''
-        print_cmd = (
-                'paps --font "FreeMono 12" --left-margin 0 --right-margin 0 | '
-                'lpr -o sides=one-sided'
-        )
+        print_cmd = ' | '.join([
+                'paps --font "FreeMono 12" --paper letter --left-margin 0 --right-margin 0 --top-margin 12 --bottom-margin 12',
+                'lpr -o sides=one-sided',
+        ])
         lpr = Popen(print_cmd, shell=True, stdin=PIPE)
         lpr.communicate(input=form_feed.join(pages).encode())
 
 
 if __name__ == '__main__':
     main()
-
-
 
